@@ -185,37 +185,36 @@ public interface IWorkerQueue
   - Try to invert the code logic to get positive if() tests.
   - Use early return pattern to return at the beginning of the method if data need is not present:
 
+````csharp
 public string Sanitize(string url)
-
 {
-
-`  `if (string.IsNullOrEmpty(url))
-
-`    `return;  
-
-`  `[...]
-
+    if (string.IsNullOrEmpty(url))
+        return;  
+    [...]
 }
+````
 
 - If previous mechanism cannot be apply, use a custom string extension with a positive expression:
 
+````csharp
 if (string.HasAny(url))
+````
 
 - Never let optional parameters without a default value. This help developers to understand witch parameters are optional only with method signature. Example:
 
+````csharp
 public string Join(string[] elements, string separator = null)
-
 { ... }
+````
 
 - Always call the Dispose() method of IDisposable objects. Try as possible to declare the disposable object in using() statement (Dispose() will be called automatically). Example:
 
+````csharp
 using (Font font = new Font("Arial", 10.0f))
-
 {
-
-`    `byte charset = font.GdiCharSet;
-
+    byte charset = font.GdiCharSet;
 }
+````
 
 - Strings:
   - Use nameof(...) instead of "..." whenever possible and relevant.
@@ -225,17 +224,15 @@ string displayName = $"{nameList[n].LastName}, {nameList[n].FirstName}";
 
 - To append strings in loops, especially when you're working with large amounts of text, use a [StringBuilder](https://docs.microsoft.com/en-us/dotnet/api/system.text.stringbuilder) object:
 
+````csharp
 var phrase = "StringConcatainationCanBeIOExhaustiveBecauseItOverwriteAllTheString";
-
 var manyPhrases = new StringBuilder();
-
 for (var i = 0; i < 10000; i++)
-
 {
-
-`    `manyPhrases.Append(phrase);
-
+    manyPhrases.Append(phrase);
 }
+````
+
 ### **Error management**
 Exception is a great mechanism to manage error in code but it’s also recourse exhaustive and must be used carefully.
 
@@ -249,39 +246,30 @@ Throwing an exception should be use only when the member cannot do what it was d
   - Implement your own dedicated exception type inherited from System.Exception.
 - Exception that are throws then catches by our code should be a dedicated exception type in order to allow developer to implement dedicated error management code in catch block. Example:
 
+````csharp
 public Cron Parse(string cronString)
-
 {
-
-`  `if (!isValid(cronString))
-
-`  `{
-
-`    `// This custom exception type could be catched by the caller 
-
-`    `// and allow to implement dedicated behavior
-
-`    `// (like display error message to the user)
-
-`    `throw new WrongCronFormatException();
-
-`  `}
-
+    if (!isValid(cronString))
+    {
+      // This custom exception type could be catched by the caller 
+      // and allow to implement dedicated behavior
+      // (like display error message to the user)
+      throw new WrongCronFormatException();
+    }
 ...
+````
 
 - Catching exception:
   - Do not catch exception without an action in catch block or at least an error log.
   - If you need to re-throw an exception, use throw; to preserve the original stack trace. Example:
 
+````csharp
 catch (DivideByZeroException ex)
-
 {
-
-`    `Console.WriteLine("Can't divide by 0");
-
-`    `throw;
-
+    Console.WriteLine("Can't divide by 0");
+    throw;
 }
+````
 
 - Some error-free approaches:
   - Always instantiate all object members in class constructor.
@@ -307,31 +295,21 @@ catch (DivideByZeroException ex)
 ### **Architecture**
 - **Inversion Of Control**: Introduce [Dependency Injection](http://joelabrahamsson.com/inversion-of-control-an-introduction-with-examples-in-net/) by declaring all class dependencies in it’s constructor:
 
+````csharp
 public class OrderService
-
 {
-
-`    `private IOrderSaver orderSaver;
-
-`    `public OrderService(IOrderSaver orderSaver)
-
-`    `{
-
-`        `this.orderSaver = orderSaver;
-
-`    `}
-
-`    `public void AcceptOrder(Order order)
-
-`    `{
-
-`        `//Domain logic such as validation
-
-`        `orderSaver.SaveOrder(order);
-
-`    `}
-
+    private IOrderSaver orderSaver;
+    public OrderService(IOrderSaver orderSaver)
+    {
+      this.orderSaver = orderSaver;
+    }
+    public void AcceptOrder(Order order)
+    {
+      //Domain logic such as validation
+      orderSaver.SaveOrder(order);
+    }
 }
+````
 
 - All business code (service, helper, handler, …) must have unit tests
 - Keep only the strict necessary visibility for all classes and members.
